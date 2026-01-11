@@ -30,13 +30,57 @@ const authoriseUser = (req, res, next) => {
     next()
 }
 
+const redirectIfAuthenticated = (req, res, next) => {
+    const token = req.cookies.token
+    if (!token){
+        return next()
+    }
+    const decoded = jwt.verify(token, process.env.JWT_KEY)
+    const user = decoded.username
+    if (users.find(u => u.username === user)){
+        req.redirect = 1;
+    }
+    next()
+}
+
 app.get("/auth-user", authoriseUser, (req, res) => {
     res.json({username: req.user})
+})
+
+app.get("/redirect", redirectIfAuthenticated, (req, res) => {
+    if (req.redirect){
+        res.json({redirect: 1})
+    }
+    else{
+        res.json({redirect: 0})
+    }
 })
 
 app.post("/auth-signup", (req, res) => {
     const {username, pswd} = req.body
     users.push({username, pswd})
+    const token = jwt.sign(
+        {username},
+        process.env.JWT_KEY,
+        {expiresIn: "1h"}
+    )
+    res.cookie("token", token, {
+        sameSite: 'lax',
+        httpOnly: true,
+        maxAge: 1000*60*60
+    })
+    res.send()
+})
+
+app.post("/auth-login", (req, res) => {
+    const {username, pswd} = req.body
+    const userIndex = users.findIndex(u => u.username===username)
+    if (!userIndex){
+        return res.status(404).json({message: "User not found"})
+    }
+    if (users[userIndex].pswd!=pswd){
+        return res.status(401).json({message: "Incorrect password"})
+    }
     const token = jwt.sign(
         {username},
         process.env.JWT_KEY,

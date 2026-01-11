@@ -11,8 +11,28 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
 }))
+
+const authoriseUser = (req, res, next) => {
+    const token = req.cookies.token
+    if (!token){
+        return res.status(401).json({ message: "Unauthorized: token missing or invalid" })
+    }
+    const decoded = jwt.verify(token, process.env.JWT_KEY)
+    const user = decoded.username
+    if (!user){
+        return res.status(404).json({message: "User not found"})
+    }
+
+    req.user = user
+    next()
+}
+
+app.get("/auth-user", authoriseUser, (req, res) => {
+    res.json({username: req.user})
+})
 
 app.post("/auth-signup", (req, res) => {
     const {username, pswd} = req.body

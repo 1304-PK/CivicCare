@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=BioRhyme:wght@200..800&family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: rgba(144, 238, 144, 0.145);
+}
+
+#hero-section{
+    background: linear-gradient(
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.797)
+    ), 
+    url(../assets/forest2.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 0 30%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#hero-section-details{
+    display: flex;
+    flex-direction: column;
+    gap: 3vmin;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.496);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 20px 20px rgba(255, 255, 255, 0.496);
+}
+
+#hero-section-details h1{
+    font-family: 'BioRhyme';
+    font-style: italic;
+    font-size: 5rem;
+}
+
+#hero-section-details p{
+    font-size: 1.3rem;
+    line-height: 1.9rem;
+    text-align: justify;
+}
+
+#button {
+    margin-top: 8vmin;
+    border: none;
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10rem;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 0.15rem;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+}
+
+#button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  border-radius: 10rem;
+  z-index: -2;
+}
+
+#button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  background-color: #616161; /* darkened version */
+  transition: all 0.3s;
+  border-radius: 10rem;
+  z-index: -1;
+}
+
+#button:hover {
+  color: #fff;
+}
+
+#button:hover::before {
+  width: 100%;
+}
+
+
+/* 2nd SECTION */
+
+#second-section{
+    display: flex;
+    gap: 5vmin;
+    justify-content: center;
+    margin: 10vmin 0 10vmin 0;
+}
+
+#second-section-details{
+    background-color: white;
+    width: 70vmin;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3vmin 3vmin;
+    border-radius: 10px;
+    border: 2px solid black;
+}
+
+#second-section-details p{
+    text-align: justify;
+    font-size: 1.2rem;
+    line-height: 1.8rem;
+}
+
+#india-map img{
+    width: 70vmin;
+    border-radius: 10px;
+}
+
+/* 3rd SECTION */
+
+#third-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#cards{
+    margin-top: 8vmin;
+    display: flex;
+    gap: 3vmin;
+}
+
+.card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: justify;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 2vmin;
+    gap: 2vmin;
+    width: 35vmin;
+    font-size: 1.2rem;
+    margin-bottom: 10vmin; 
+    background-color: white;
+}

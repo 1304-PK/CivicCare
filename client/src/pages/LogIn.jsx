@@ -46,6 +46,7 @@ const LogIn = () => {
                 type="Log In"
                 redirect="Sign Up"
                 redirect_link="/signup"
+                redirect_text="Don't have an account?"
                 handleSubmit={handleSubmit}
                 username_ref={username_i}
                 pswd_ref={pswd_i}

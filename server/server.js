@@ -21,18 +21,21 @@ app.use(cors({
     credentials: true
 }))
 
-const authoriseUser = (req, res, next) => {
+const authoriseUser = async (req, res, next) => {
     const token = req.cookies.token
     if (!token) {
-        return res.status(401).json({ message: "Unauthorized: token missing or invalid" })
+        return res.status(401).json({ errMsg: "Unauthorized: token missing or invalid" })
     }
     const decoded = jwt.verify(token, process.env.JWT_KEY)
-    const username = decoded.username
-    if (!user) {
-        return res.status(404).json({ message: "User not found" })
-    }
-
-    req.user = user
+    const userId = decoded.userId
+    const [rows] = await pool.execute(
+        "SELECT id FROM users WHERE id = ?",
+        [userId]
+    )
+    if (!rows.length) {
+        return res.status(404).json({ errMsg: "User not found" })
+    }              
+    req.userId = userId
     next()
 }
 
@@ -53,8 +56,14 @@ const redirectIfAuthenticated = async (req, res, next) => {
     next()
 }
 
-app.get("/auth-user", authoriseUser, (req, res) => {
-    res.json({ username: req.user })
+app.get("/api/dashboard-info", authoriseUser, async (req, res) => {
+    const [rows] = await pool.execute(
+        "SELECT username FROM users WHERE id = ?",
+        [req.userId]
+    )
+    const username = rows[0].username
+    console.log(username)
+    res.json({username:username})
 })
 
 app.get("/redirect", redirectIfAuthenticated, (req, res) => {
@@ -72,10 +81,12 @@ app.post("/auth-signup", async (req, res) => {
         }
         const hashedPswd = await bcrypt.hash(pswd, 10)
         const [result] = await pool.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)", [username, hashedPswd]
+            "INSERT INTO users (username, password) VALUES (?, ?)", [username, hashedPswd], (err, result) => {
+                if (err) throw err
+            }
         )
         const token = jwt.sign(
-            { username },
+            { userId: result.insertId },
             process.env.JWT_KEY,
             { expiresIn: "1h" }
         )

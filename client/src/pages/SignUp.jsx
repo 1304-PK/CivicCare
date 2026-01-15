@@ -9,13 +9,15 @@ const SignUp = () => {
 
     useEffect(() => {
         const authUser = async () => {
-            const res = await fetch("http://localhost:3000/redirect", {
+            try{const res = await fetch("http://localhost:3000/redirect", {
                 method: "GET",
                 credentials: "include"
             })
             const data = await res.json()
             if (data.redirect){
                 navigate("/user-dashboard")
+            }} catch(err){
+                console.log("Redirect check failed", err)
             }
         }
         authUser()
@@ -23,7 +25,7 @@ const SignUp = () => {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
-        const res = await fetch("http://localhost:3000/auth-signup", {
+        try {const res = await fetch("http://localhost:3000/auth-signup", {
             method: "POST",
             credentials: "include",
             headers: {
@@ -34,8 +36,14 @@ const SignUp = () => {
                 pswd: pswd_i.current.value
             })
         })
+        const data = await res.json()
+        if (data.exists){
+            return console.log("User already exists, Log in...")
+        }
         if (res.ok){
             navigate("/user-dashboard")
+        }} catch(err){
+            console.log("Error in authenticating form", err)
         }
     }
   return (

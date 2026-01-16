@@ -2,17 +2,27 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
-const mysql = require('mysql2')
 const pool = require('./db.js')
 const multer = require('multer')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 
 const app = express()
-const users = []
 
 // Middlewares
-const upload = multer({ dest: "uploads/" })
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/')
+    },
+    filename: (req, file, cb) => {
+        const filename = `${Date.now() + file.originalname}`
+        cb(null, filename)
+    }
+})
+
+const upload = multer({
+    storage: storage                              
+})
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
@@ -124,20 +134,23 @@ app.post("/auth-login", (req, res) => {
     res.send()
 })
 
-app.post("/upload-complaint", upload.single('file'), authoriseUser, (req, res) => {
-    const user = req.user
-    const index = users.findIndex(u => u.username === user)
-    if (index === -1) {
-        return res.status(404).json({ message: "User not found" })
+app.post("/upload-complaint", authoriseUser, upload.single('file'), async (req, res) => {
+    try{
+        const userId = req.userId
+        console.log(req.file)
+        const {subject, description, address, state, city} = req.body
+        const {path} = req.file
+
+        const [result] = await pool.execute(
+            `INSERT INTO complaints 
+            (user_id, subject, description, address, city, state, file_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [userId, subject, description, address, city, state, path]
+        )
+        res.status(201).json({})
+    } catch(err){
+        res.status(500).json({errMsg: err.message})
     }
-    users[index].complaints.push({
-        ...req.body,
-        filename: req.file.filename,
-        filepath: req.file.path,
-        filesize: req.file.size
-    })
-    console.log(users[index])
-    res.send()
 })
 
 app.listen(3000, (err) => {

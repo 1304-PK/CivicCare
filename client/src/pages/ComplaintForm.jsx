@@ -1,14 +1,23 @@
-import { useState, useRef } from "react"
+import { useState, useEffect} from "react"
+import {State, City} from "country-state-city"
 
 const ComplaintForm = () => {
 
   const [formFields, setFormFields] = useState({
     subject: '',
     description: '',
-    location: ''
+    state: '',
+    city: '',
+    address: ''
   })
 
   const [file, setFile] = useState(null)
+
+  const indianStates = State.getAllStates()
+  useEffect(() => {
+    console.log(indianStates)
+  }, [])
+  
 
   const handleInputChange = (e) => {
     const {name, value} = e.target
@@ -27,12 +36,15 @@ const ComplaintForm = () => {
         const formData = new FormData()
         formData.append('subject', formFields.subject)
         formData.append('description', formFields.description)
-        formData.append('location', formFields.location)
+        formData.append('state', formFields.state)
+        formData.append('city', formFields.city)
+        formData.append('address', formFields.address)
         formData.append('file', file)
 
         try{
           const res = await fetch("http://localhost:3000/upload-complaint", {
             method: "POST",
+            credentials: "include",
             body: formData
           })
           if (res.ok){
@@ -51,10 +63,16 @@ const ComplaintForm = () => {
         <form onSubmit={handleFormSubmit}>
             <label htmlFor="subject">Subject</label>
             <input type="text" name="subject" id="subject" onChange={handleInputChange}/>
+
             <label htmlFor="description">Description</label>
             <textarea name="description" id="description" onChange={handleInputChange}></textarea>
-            <label htmlFor="location">Location</label>
-            <input type="text" name="location" id="location" onChange={handleInputChange}/>
+
+            <label htmlFor="state">State</label>
+            <input type="text" name="state" id="state" onChange={handleInputChange}/>
+            <label htmlFor="city">City</label>
+            <input type="text" name="city" id="city" onChange={handleInputChange}/>
+            <label htmlFor="address">Address</label>
+            <input type="text" name="address" id="address" onChange={handleInputChange}/>
             <label htmlFor="image">Image</label>
             <input 
             type="file" 

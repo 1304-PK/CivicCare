@@ -1,0 +1,217 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.page-container {
+  background-color: gray;
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 200px;
+  font-family: Arial, sans-serif;
+}
+
+.form-container {
+  min-width: 560px;
+  margin: 0 7vmin;
+  border: 2px solid black;
+  background-color: white;
+  width: 100%;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+}
+
+.form-header {
+  background-color: black;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.form-header h1 {
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.complaint-form {
+  padding: 5vmin 10vmin;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.form-field input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  transition: border-color 0.3s;
+  background-color: white;
+  color: black;
+}
+
+.form-field input[type="text"]:focus {
+  outline: none;
+  border-color: #333;
+}
+
+.form-field textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-family: Arial, sans-serif;
+  resize: none;
+  transition: border-color 0.3s;
+  background-color: white;
+  color: black;
+}
+
+.form-field textarea:focus {
+  outline: none;
+  border-color: #333;
+}
+
+.location-section {
+  margin-bottom: 20px;
+}
+
+.state-city-row {
+  display: flex;
+  gap: 15px;
+}
+
+.state-city-row .form-field {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .state-city-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+.section-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.upload-section {
+  margin-bottom: 30px;
+}
+
+.upload-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.file-upload-wrapper {
+  position: relative;
+}
+
+.file-input {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.file-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 120px;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  gap: 10px;
+  transition: border-color 0.3s;
+}
+
+.file-upload-label:hover {
+  border-color: #007bff;
+}
+
+.browse-button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.file-upload-label:hover .browse-button {
+  background-color: #0056b3;
+}
+
+.file-text {
+  font-size: 13px;
+  color: #666;
+}
+
+.submit-section {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.submit-btn {
+  background-color: black;
+  color: white;
+  padding: 14px 50px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #333;
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+.complaint-form-bottom-text-div{
+    text-align: center;
+    margin-top: 2vmin;
+}
+
+.bottom-text{
+    color: black;
+    text-decoration: none;
+
+    &:hover{
+        text-decoration: underline;
+    }
+}

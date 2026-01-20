@@ -1,0 +1,37 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #000000;
+}
+
+.dashboard {
+  min-height: 100vh;
+  padding-bottom: 40px;
+  background-color: #000000;
+}
+
+.header {
+    text-align: center;
+  padding: 30px 40px;
+}
+
+.header-title {
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 4vmin;
+  margin-left: 80px;
+  padding: 40px;
+  flex-wrap: wrap;
+}

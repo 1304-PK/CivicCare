@@ -29,7 +29,7 @@ const LandingPage = () => {
 
       <section className="why-section">
           <div className="why-header">
-            <h2 className="section-heading">Why Civic Care</h2>
+            <h2 className="landing-section-heading">Why Civic Care</h2>
           </div>
           <div className="why-body">
             <div className="why-image">
@@ -59,13 +59,14 @@ const LandingPage = () => {
       </section>
 
       <section className="how-section">
-        <h2 className="section-heading center">How CivicCare Works</h2>
-        <div className="cards-container">
+        <h2 className="landing-section-heading center">How CivicCare Works</h2>
+
+        <div className="landing-cards-container">
           <div className="card">
             <div className="card-icon">
               <FileText size={24} />
             </div>
-            <h3 className="card-title">Sign Up & Report</h3>
+            <h3 className="landing-card-title">Sign Up & Report</h3>
             <p className="card-description">
               Create your account and submit detailed complaints about civic issues 
               in your area with photos and location information.
@@ -76,7 +77,7 @@ const LandingPage = () => {
             <div className="card-icon">
               <Bell size={24} />
             </div>
-            <h3 className="card-title">Alert Authorities</h3>
+            <h3 className="landing-card-title">Alert Authorities</h3>
             <p className="card-description">
               Your complaint is instantly routed to the relevant government department 
               and assigned to responsible officers.
@@ -87,7 +88,7 @@ const LandingPage = () => {
             <div className="card-icon">
               <Users size={24} />
             </div>
-            <h3 className="card-title">Officer Review</h3>
+            <h3 className="landing-card-title">Officer Review</h3>
             <p className="card-description">
               Government officers review, acknowledge, and take action on reported 
               issues through their dedicated dashboard.
@@ -98,7 +99,7 @@ const LandingPage = () => {
             <div className="card-icon">
               <CheckCircle size={24} />
             </div>
-            <h3 className="card-title">Track Progress</h3>
+            <h3 className="landing-card-title">Track Progress</h3>
             <p className="card-description">
               Monitor real-time updates on your complaint status from pending to 
               in-progress to resolved with full transparency.

@@ -451,8 +451,8 @@ body {
   flex-wrap: wrap;
 }
 
-.complaint-card {
-  flex-shrink: 0;
+.dashboard-complaint-card {
+  flex-shrink: 1;
   flex-grow: 1;
   background: #f8fdf5;
   border-radius: 16px;

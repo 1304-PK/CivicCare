@@ -9,13 +9,20 @@ require('dotenv').config()
 
 const app = express()
 
+// Utility Functions
+
+const Capitalize = (word) => {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
+
 // Middlewares
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/')
     },
     filename: (req, file, cb) => {
-        const filename = `${Date.now() + file.originalname}`
+        let filename = `${Date.now() + '-' + file.originalname.replace(/\s+/g, '_')}`
         cb(null, filename)
     }
 })
@@ -25,8 +32,9 @@ const upload = multer({
 })
 app.use(express.json())
 app.use(cookieParser())
+app.use('/uploads', express.static("uploads"))
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
     methods: ["GET", "POST"],
     credentials: true
 }))
@@ -55,10 +63,10 @@ const redirectIfAuthenticated = async (req, res, next) => {
         return next()
     }
     const decoded = jwt.verify(token, process.env.JWT_KEY)
-    const username = decoded.username
+    const userId = decoded.userId
     const [rows] = await pool.execute(
-        "SELECT username, password FROM users WHERE username = ? LIMIT 1",
-        [username]
+        "SELECT * FROM users WHERE id = ? LIMIT 1",
+        [userId]
     );
     if (rows.length > 0) {
         return res.json({ redirect: 1 })
@@ -66,32 +74,62 @@ const redirectIfAuthenticated = async (req, res, next) => {
     next()
 }
 
+// GET REQUESTS
+
 app.get("/api/dashboard-info", authoriseUser, async (req, res) => {
+    const userId = req.userId
     const [rows] = await pool.execute(
         "SELECT username FROM users WHERE id = ?",
-        [req.userId]
+        [userId]
+    )
+    const [complaint] = await pool.execute(
+        "SELECT * FROM complaints WHERE user_id = ? ORDER BY created_at DESC LIMIT 1",
+        [userId]
     )
     const username = rows[0].username
-    console.log(username)
-    res.json({username:username})
+    res.json({username, complaint: complaint[0]})
 })
 
 app.get("/redirect", redirectIfAuthenticated, (req, res) => {
     res.json({})
 })
 
+app.get("/api/get-complaint-form", authoriseUser, (req, res) => {
+    res.json({})
+})
+
+app.get("/get-complaints", authoriseUser, async(req, res) => {
+    try{
+        const userId = req.userId
+    const [complaints] = await pool.execute(
+      `SELECT *
+       FROM complaints
+       WHERE user_id = ?
+       ORDER BY created_at DESC`,
+      [userId]
+    )
+    res.json(complaints)
+} catch(err){
+    res.status(500).json({errMsg: err.message})
+}
+    
+})
+
+// POST REQUESTS
+
 app.post("/auth-signup", async (req, res) => {
     const { username, pswd } = req.body
+    const username_ = Capitalize(username)
     try {
         const [rows] = await pool.execute(
-            "SELECT 1 AS `exists` FROM users WHERE username = ? LIMIT 1", [username]
+            "SELECT 1 AS `exists` FROM users WHERE username = ? LIMIT 1", [username_]
         )
         if (rows.length > 0) {
             return res.json({ exists: 1 })
         }
         const hashedPswd = await bcrypt.hash(pswd, 10)
         const [result] = await pool.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)", [username, hashedPswd], (err, result) => {
+            "INSERT INTO users (username, password) VALUES (?, ?)", [username_, hashedPswd], (err, result) => {
                 if (err) throw err
             }
         )
@@ -111,6 +149,7 @@ app.post("/auth-signup", async (req, res) => {
         res.status(422).json({ msg: err.message })
     }
 })
+
 
 app.post("/auth-login", (req, res) => {
     const { username, pswd } = req.body

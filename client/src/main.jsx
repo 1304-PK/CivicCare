@@ -6,6 +6,8 @@ import SignUp from './pages/SignUp'
 import LogIn from './pages/LogIn'
 import UserDashboard from './pages/UserDashboard'
 import ComplaintForm from './pages/ComplaintForm'
+import PastComplaints from './pages/PastComplaints'
+import Sidebar from './components/SideBar'
 import './index.css'
 
 const router = createBrowserRouter([
@@ -28,6 +30,10 @@ const router = createBrowserRouter([
   {
     path: "/complaint-form",
     element: <ComplaintForm />
+  },
+  {
+    path: "/past-complaints",
+    element: <PastComplaints />
   }
 ])
 

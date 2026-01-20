@@ -139,14 +139,14 @@ body {
   padding: 20px 0;
 }
 
-.section-heading {
+.landing-section-heading {
   font-size: 55px;
   font-weight: 700;
   color: white;
   margin-bottom: 28px;
 }
 
-.section-heading.center {
+.landing-section-heading.center {
   text-align: center;
 }
 
@@ -163,7 +163,7 @@ body {
   padding: 100px 20px;
 }
 
-.cards-container {
+.landing-cards-container {
   max-width: 1400px;
   margin: 60px auto 0;
   display: grid;
@@ -204,7 +204,7 @@ body {
   border: 2px solid #ffffff;
 }
 
-.card-title {
+.landing-card-title {
   font-size: 22px;
   font-weight: 600;
   color: white;

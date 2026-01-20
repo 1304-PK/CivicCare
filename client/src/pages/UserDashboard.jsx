@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNavigate, NavLink } from 'react-router-dom';
+import Sidebar from '../components/SideBar';
 import { Menu, X, LayoutDashboard, FileText, Clock, Settings, Plus } from 'lucide-react';
 import '../styles/UserDashboard.css';
 
@@ -8,6 +9,8 @@ const UserDashboard = () => {
 
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(true)
+  const [username, setUsername] = useState("")
+  const [latestComplaint, setLatestComplaint] = useState(null)
 
   useEffect(() => {
     const authoriseUser = async () => {
@@ -18,7 +21,10 @@ const UserDashboard = () => {
         })
         const data = await res.json()
         if (res.ok) {
+          console.log(data.complaint, data.username)
           setIsLoading(false)
+          setUsername(data.username)
+          data.complaint && setLatestComplaint(data.complaint)
         }
         else {
           navigate("/login")
@@ -32,10 +38,6 @@ const UserDashboard = () => {
     authoriseUser()
   }, [])
 
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [filter, setFilter] = useState('All');
-  const userName = "Alex";
-
   const statsData = [
     { title: "Roads Issue", count: 12, color: "#814300ff" },
     { title: "Wastage Issue", count: 8, color: "#22ff00ff" },
@@ -44,90 +46,20 @@ const UserDashboard = () => {
 
   const totalComplaints = statsData.reduce((sum, item) => sum + item.count, 0);
 
-  const complaints = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=400&h=300&fit=crop",
-      title: "Broken Road on Main Street",
-      description: "Large pothole causing traffic issues and potential vehicle damage",
-      status: "Pending"
-    }
-  ];
-
-  const filteredComplaints =
-    filter === 'All'
-      ? complaints
-      : complaints.filter(c => c.status === filter);
-
   if (isLoading) return (
     <LoadingSpinner />
   )
-
   return (
     <div className="dashboard-container">
-      {/* Mobile Hamburger Toggle */}
-      <button
-        className="hamburger-toggle"
-        onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-      >
-        {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div
-        className={`sidebar-overlay ${isMobileSidebarOpen ? 'active' : ''}`}
-        onClick={() => setIsMobileSidebarOpen(false)}
-      />
-
-      {/* Sidebar */}
-      <aside className={`sidebar ${isMobileSidebarOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-content">
-          <div className="logo-section">
-            <h1 className="logo">CivicCare</h1>
-          </div>
-
-          <nav className="nav-menu">
-            <button className="nav-button-collapsed active">
-              <LayoutDashboard size={20} />
-            </button>
-            <button className="nav-button-expanded active">
-              <LayoutDashboard size={20} />
-              <span>Dashboard</span>
-            </button>
-
-            <button className="nav-button-collapsed">
-              <FileText size={20} />
-            </button>
-            <button className="nav-button-expanded" onClick={() => {navigate("/complaint-form")}}>
-              <FileText size={20} />
-              <span>New Complaint</span>
-            </button>
-
-            <button className="nav-button-collapsed">
-              <Clock size={20} />
-            </button>
-            <button className="nav-button-expanded">
-              <Clock size={20} />
-              <span>Past Complaints</span>
-            </button>
-
-            <button className="nav-button-collapsed">
-              <Settings size={20} />
-            </button>
-            <button className="nav-button-expanded">
-              <Settings size={20} />
-              <span>Settings</span>
-            </button>
-          </nav>
-        </div>
-      </aside>
+      {/* Sidebar Component */}
+      <Sidebar />
 
       {/* Main Content */}
       <main className="main-content">
         {/* Welcome Section */}
         <section className="welcome-section">
           <div className="welcome-text">
-            <h2>Hey {userName},</h2>
+            <h2>Hey {username || "User"},</h2>
             <p>Ready to make a change?</p>
           </div>
           <button className="new-complaint-btn"
@@ -239,38 +171,39 @@ const UserDashboard = () => {
                 </div>
               </div>
             </div>
-          
+
           </section>
           {/* Complaints Section */}
           <section className="complaints-section">
             <div className="complaints-header">
-              <h3 className="section-title">Past Complaints</h3>
+              <h3 className="section-title">Latest Complaint</h3>
             </div>
-            <div className="complaints-grid">
-              {filteredComplaints.map(complaint => (
-                <div key={complaint.id} className="complaint-card">
-                  <img
-                    src={complaint.image}
-                    alt={complaint.title}
-                    className="complaint-image"
-                  />
-                  <div className="complaint-content">
-                    <h4 className="complaint-title">{complaint.title}</h4>
-                    <p className="complaint-description">
-                      {complaint.description}
-                    </p>
-                    <span
-                      className={`status-badge ${complaint.status.toLowerCase()}`}
-                    >
-                      {complaint.status}
-                    </span>
-                  </div>
+            {latestComplaint && 
+              <div className="complaints-grid">
+
+              <div className="dashboard-complaint-card">
+                <img
+                  src={'http://localhost:3000/' + latestComplaint.file_path.replace(/\\/, '/')}
+                  alt={latestComplaint.subject}
+                  className="complaint-image"
+                />
+                <div className="complaint-content">
+                  <h4 className="complaint-title">{latestComplaint.subject}</h4>
+                  <p className="complaint-description">
+                    {latestComplaint.description}
+                  </p>
+                  <span
+                    className={`status-badge ${latestComplaint.status.toLowerCase()}`}
+                  >
+                    {latestComplaint.status}
+                  </span>
                 </div>
-              ))}
-            </div>
-            <div className='bottom-text'>
-              <NavLink className='see-more'>See More...</NavLink>
-            </div>
+              </div>
+              <div className='bottom-text'>
+                <NavLink className='see-more' to="/past-complaints">See More...</NavLink>
+              </div>
+            </div>}
+
           </section>
         </div>
       </main>

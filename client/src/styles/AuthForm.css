@@ -44,6 +44,39 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgb(43, 43, 43) 100%);
   gap: 20px;
 }
 
+.login-form-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: pink;
+}
+
+/* SELECT ROLE */
+
+.select-role{
+    color: white;
+    display: flex;
+    background-color: transparent;
+    margin-bottom: 2vmin;
+}
+
+.select-role button{
+  padding: 2vmin;
+  font-size: 1rem;
+  flex: 1;
+  border: none;
+  background-color: black;
+  color: inherit;
+  cursor: pointer;
+  
+}
+
+.active-role{
+  transition: background-color 300ms ease;
+  background-color: gray !important;
+}
+
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -65,6 +98,10 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgb(43, 43, 43) 100%);
   transition: border-color 0.3s ease;
   background-color: #f5f5f5;
   color: #000000;
+}
+
+.auth-form-err-msg{
+  color: red;
 }
 
 .signupButton {

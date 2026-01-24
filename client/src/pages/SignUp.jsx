@@ -1,11 +1,15 @@
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import AuthForm from "../components/AuthForm"
+import MessagePopup from "../components/MessagePopup"
 
 const SignUp = () => {
     const navigate = useNavigate()
-    const username_i = useRef(null)
-    const pswd_i = useRef(null)
+
+    const [errDialog, setErrDialog] = useState({})
+    const [errMsg, setErrMsg] = useState(null)
+    const [username, setUsername] = useState("")
+    const [pswd, setPswd] = useState("")
 
     useEffect(() => {
         const authUser = async () => {
@@ -23,8 +27,33 @@ const SignUp = () => {
         authUser()
     }, [])
 
+    const validateInput = () => {
+        if (!username?.trim()){
+            setErrMsg("Username cannot be empty")
+            return 0;
+        }
+        else if (username?.length<6){
+            setErrMsg("Username cannot be less than 6 characters")
+            return 0;
+        }
+
+        if (!pswd?.trim){
+            setErrMsg("Password cannot be empty")
+            return 0;
+        }
+        else if (pswd?.length<6){
+            setErrMsg("Password cannot be less than 6 characters")
+            return 0;
+        }
+        return 1;
+    }
+
     const handleSubmit = async(e) => {
         e.preventDefault()
+        const validInput = validateInput()
+        if (!validInput){
+            return
+        }
         try {const res = await fetch("http://localhost:3000/auth-signup", {
             method: "POST",
             credentials: "include",
@@ -32,14 +61,24 @@ const SignUp = () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username: username_i.current.value,
-                pswd: pswd_i.current.value
+                username, pswd
             })
         })
         const data = await res.json()
-        if (data.exists){
-            return console.log("User already exists, Log in...")
+        
+        if (res.status===409){
+            setErrDialog({
+                visibility: true,
+                iconType: "error",
+                title: "Username exists already",
+                message: "Log In instead",
+                btnText: "Close",
+                handlePopupBtnClick: () => {
+                    setErrDialog({})
+                }
+            })
         }
+
         if (res.ok){
             navigate("/user-dashboard")
         }} catch(err){
@@ -47,6 +86,7 @@ const SignUp = () => {
         }
     }
   return (
+    <>
     <div>
         <AuthForm 
         type="Sign Up"
@@ -54,12 +94,21 @@ const SignUp = () => {
         redirect_link="/login"
         redirect_text="Already have an account?"
         handleSubmit={handleSubmit}
-        username_ref={username_i}
-        pswd_ref={pswd_i}
+        onUsernameChange={(e) => {setUsername(e.target.value)}}
+        username_val={username}
+        onPswdChange={(e) => {setPswd(e.target.value)}}
+        pswd_val={pswd}
         title="Congratulations"
         description="This is your first step to contribute to nature"
+        errMsg={errMsg}
         />
     </div>
+    {
+        errDialog.visibility && <MessagePopup 
+        props={errDialog}
+        />
+    }
+    </>
   )
 }
 

@@ -155,6 +155,10 @@
   white-space: nowrap;
 }
 
+.sidebar-log-out-btn{
+  color: pink !important;
+}
+
 @media (min-width: 769px) {
   .sidebar:not(:hover) .nav-button-collapsed {
     display: flex;

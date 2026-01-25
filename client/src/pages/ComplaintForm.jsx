@@ -53,11 +53,11 @@ export default function ComplaintForm() {
   const handleSubmit = async (e) => {
     e.preventDefault()
         const formData = new FormData()
-        formData.append('subject', formFields.subject)
-        formData.append('description', formFields.description)
-        formData.append('state', formFields.state)
-        formData.append('city', formFields.city)
-        formData.append('address', formFields.address)
+        formData.append('subject', formFields.subject.toLowerCase())
+        formData.append('description', formFields.description.toLowerCase())
+        formData.append('state', formFields.state.toLowerCase())
+        formData.append('city', formFields.city.toLowerCase())
+        formData.append('address', formFields.address.toLowerCase())
         formData.append('file', file)
 
         try{

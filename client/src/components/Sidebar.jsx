@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Menu, X, LayoutDashboard, FileText, Clock, Settings, Plus } from 'lucide-react';
+import { TbLogout2 } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import "../styles/Sidebar.css"
 
@@ -7,6 +8,16 @@ const Sidebar = () => {
 
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const navigate = useNavigate()
+
+  const handleLogOut = async () => {
+    const res = await fetch("http://localhost:3000/api/logout", {
+      method: "GET",
+      credentials: "include"
+    })
+    if (res.ok){
+      navigate("/login")
+    }
+  }
 
     return (
         <div className="sidebar">
@@ -62,7 +73,16 @@ const Sidebar = () => {
               <Settings size={20} />
               <span>Settings</span>
             </button>
+
+            <button className="nav-button-collapsed">
+              <TbLogout2 size={20}/>
+            </button>
+            <button className="nav-button-expanded sidebar-log-out-btn" onClick={handleLogOut}>
+              <TbLogout2 size={20} />
+              <span>Log Out</span>
+            </button>
           </nav>
+            
         </div>
       </aside>
         </div>

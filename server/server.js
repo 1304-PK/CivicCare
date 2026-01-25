@@ -28,14 +28,14 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({
-    storage: storage                              
+    storage: storage
 })
 app.use(express.json())
 app.use(cookieParser())
 app.use('/uploads', express.static("uploads"))
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
-    methods: ["GET", "POST"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"],
+    methods: ["GET", "POST", "PATCH"],
     credentials: true
 }))
 
@@ -52,7 +52,25 @@ const authoriseUser = async (req, res, next) => {
     )
     if (!rows.length) {
         return res.status(404).json({ errMsg: "User not found" })
-    }              
+    }
+    req.userId = userId
+    next()
+}
+
+const authoriseOfficer = async (req, res, next) => {
+    const token = req.cookies.token
+    if (!token) {
+        return res.status(401).json({ errMsg: "Unauthorized: token missing or invalid" })
+    }
+    const decoded = jwt.verify(token, process.env.JWT_KEY)
+    const userId = decoded.userId
+    const [rows] = await pool.execute(
+        "SELECT officer_id FROM officers WHERE officer_id = ?",
+        [userId]
+    )
+    if (!rows.length) {
+        return res.status(404).json({ errMsg: "Officer not found" })
+    }
     req.userId = userId
     next()
 }
@@ -76,7 +94,7 @@ const redirectIfAuthenticated = async (req, res, next) => {
 
 // GET REQUESTS
 
-app.get("/api/dashboard-info", authoriseUser, async (req, res) => {
+app.get("/api/user-dashboard-info", authoriseUser, async (req, res) => {
     const userId = req.userId
     const [rows] = await pool.execute(
         "SELECT username FROM users WHERE id = ?",
@@ -87,7 +105,7 @@ app.get("/api/dashboard-info", authoriseUser, async (req, res) => {
         [userId]
     )
     const username = rows[0].username
-    res.json({username, complaint: complaint[0]})
+    res.json({ username, complaint: complaint[0] })
 })
 
 app.get("/redirect", redirectIfAuthenticated, (req, res) => {
@@ -98,40 +116,103 @@ app.get("/api/get-complaint-form", authoriseUser, (req, res) => {
     res.json({})
 })
 
-app.get("/get-complaints", authoriseUser, async(req, res) => {
-    try{
+app.get("/get-complaints", authoriseUser, async (req, res) => {
+    try {
         const userId = req.userId
-    const [complaints] = await pool.execute(
-      `SELECT *
+        const [complaints] = await pool.execute(
+            `SELECT *
        FROM complaints
        WHERE user_id = ?
        ORDER BY created_at DESC`,
-      [userId]
+            [userId]
+        )
+        res.json(complaints)
+    } catch (err) {
+        res.status(500).json({ errMsg: err.message })
+    }
+
+})
+
+//--------
+
+app.get("/api/officer-dashboard-info", authoriseOfficer, async (req, res) => {
+    try{
+        const userId = req.userId
+    const [rows_] = await pool.execute(
+        "SELECT city, state FROM officers WHERE officer_id = ?",
+        [userId]
     )
-    res.json(complaints)
-} catch(err){
+    const city = rows_[0].city, state = rows_[0].state
+    const [pending_] = await pool.execute(
+        "SELECT complaint_id FROM complaints where city = ? AND state = ? AND status = ?",
+        [city, state, "pending"]
+    )
+    const [resolved_] = await pool.execute(
+        "SELECT complaint_id FROM complaints where city = ? AND state = ? AND status = ?",
+        [city, state, "resolved"]
+    )
+
+    const pendingComplaints = pending_.length, resolvedComplaints = resolved_.length, totalComplaints = pending_.length + resolved_.length
+
+    const [recent_] = await pool.execute(
+        "SELECT complaint_id, subject, address, city, state, created_at FROM complaints where city = ? AND state = ? ORDER BY created_at LIMIT 3",
+        [city, state]
+    )
+    res.json({
+        stats: {
+            pendingComplaints, resolvedComplaints, totalComplaints
+        },
+        recentComplaints: recent_,
+        location: {
+            city, state
+        }
+    })
+} catch(err) {
     res.status(500).json({errMsg: err.message})
 }
-    
+})
+
+app.get("/api/get-area-complaints", authoriseOfficer, async (req, res) => {
+    try    {
+        const userId = req.userId
+    const [rows] = await pool.execute(
+        "SELECT city, state FROM officers WHERE officer_id = ?",
+        [userId]
+    )
+    const city = rows[0].city, state = rows[0].state
+    const [complaints] = await pool.execute(
+        "SELECT complaint_id, subject, description, address, city, state, status, file_path FROM complaints WHERE city = ? AND state = ?",
+        [city, state]
+    )
+    res.json({complaints: complaints})
+} catch (err){
+    res.status(500).json({errMsg: err.message})
+}
+})
+
+app.get("/api/logout", (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax"
+    })
+    res.json({})
 })
 
 // POST REQUESTS
 
 app.post("/auth-signup", async (req, res) => {
     const { username, pswd } = req.body
-    const username_ = Capitalize(username)
     try {
         const [rows] = await pool.execute(
-            "SELECT 1 AS `exists` FROM users WHERE username = ? LIMIT 1", [username_]
+            "SELECT 1 AS `exists` FROM users WHERE username = ? LIMIT 1", [username]
         )
         if (rows.length > 0) {
-            return res.json({ exists: 1 })
+            return res.status(409).json({errMsg: "User already exists, Log In"})
         }
         const hashedPswd = await bcrypt.hash(pswd, 10)
         const [result] = await pool.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)", [username_, hashedPswd], (err, result) => {
-                if (err) throw err
-            }
+            "INSERT INTO users (username, password) VALUES (?, ?)", 
+            [username, hashedPswd]
         )
         const token = jwt.sign(
             { userId: result.insertId },
@@ -151,43 +232,91 @@ app.post("/auth-signup", async (req, res) => {
 })
 
 
-app.post("/auth-login", (req, res) => {
-    const { username, pswd } = req.body
-    const userIndex = users.findIndex(u => u.username === username)
-    if (!userIndex) {
-        return res.status(404).json({ message: "User not found in Database" })
+app.post("/auth-login", async (req, res) => {
+    try {
+        const { role, username, pswd } = req.body
+        let userId = null;
+        if (role === 'citizen') {
+            const [rows] = await pool.execute(
+                "SELECT password, id FROM users WHERE username = ?",
+                [username]
+            )
+            if (rows.length === 0) {
+                return res.status(401).json({ errMsg: "Invalid Credentials" })
+            }
+            const isMatch = await bcrypt.compare(pswd, rows[0].password)
+            if (!isMatch) {
+                return res.status(401).json({ errMsg: "Invalid Credentials" })
+            }
+            userId = rows[0].id
+        }
+        else if (role === 'officer') {
+            const [rows] = await pool.execute(
+                "SELECT password, officer_id FROM officers WHERE username = ?",
+                [username]
+            )
+            if (rows.length === 0) {
+                return res.status(401).json({ errMsg: "Invalid Credentials" })
+            }
+            const isMatch = (pswd === rows[0].password)
+            if (!isMatch) {
+                return res.status(401).json({ errMsg: "Invalid Credentials" })
+            }
+            userId = rows[0].officer_id
+        }
+        const token = jwt.sign(
+            { userId },
+            process.env.JWT_KEY,
+            { expiresIn: "1h" }
+        )
+        res.cookie("token", token, {
+            sameSite: 'lax',
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60
+        })
+        res.json({ role: role })
+    } catch (err) {
+        res.status(500).json({ errMsg: err.message })
     }
-    if (users[userIndex].pswd != pswd) {
-        return res.status(401).json({ message: "Incorrect password" })
-    }
-    const token = jwt.sign(
-        { username },
-        process.env.JWT_KEY,
-        { expiresIn: "1h" }
-    )
-    res.cookie("token", token, {
-        sameSite: 'lax',
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60
-    })
-    res.send()
 })
 
 app.post("/upload-complaint", authoriseUser, upload.single('file'), async (req, res) => {
-    try{
+    try {
         const userId = req.userId
-        console.log(req.file)
-        const {subject, description, address, state, city} = req.body
-        const {path} = req.file
+        const { subject, description, address, state, city } = req.body
+        const { path } = req.file
 
         const [result] = await pool.execute(
             `INSERT INTO complaints 
             (user_id, subject, description, address, city, state, file_path)
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [userId, subject, description, address, city, state, path]
+            [userId, subject.toLowerCase(), description.toLowerCase(), address.toLowerCase(), city.toLowerCase(), state.toLowerCase(), path]
         )
         res.status(201).json({})
-    } catch(err){
+    } catch (err) {
+        res.status(500).json({ errMsg: err.message })
+    }
+})
+
+// PATCH REQUESTS
+
+app.patch("/api/update-complaint-status", authoriseOfficer, async (req, res) => {
+    try{
+        const {complaint_id, newStatus} = req.body
+        const [result] = await pool.execute(
+            "UPDATE complaints SET status = ? WHERE complaint_id = ?",
+            [newStatus, complaint_id]
+        )
+        if (result.affectedRows === 0){
+            return res.status(404).json({errMsg: "Complaint not found"})
+        }
+        const [getStatus] = await pool.execute(
+            "SELECT status FROM complaints WHERE complaint_id = ?",
+            [complaint_id]
+        )
+        const updatedStatus = getStatus[0].status
+        res.json({updatedStatus: updatedStatus, complaintId: complaint_id})
+    } catch (err){
         res.status(500).json({errMsg: err.message})
     }
 })

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNavigate, NavLink } from 'react-router-dom';
 import Sidebar from '../components/SideBar';
+import { FaWpforms } from "react-icons/fa";
 import { Menu, X, LayoutDashboard, FileText, Clock, Settings, Plus } from 'lucide-react';
 import '../styles/UserDashboard.css';
 
@@ -15,22 +16,20 @@ const UserDashboard = () => {
   useEffect(() => {
     const authoriseUser = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/dashboard-info", {
+        const res = await fetch("http://localhost:3000/api/user-dashboard-info", {
           method: "GET",
           credentials: "include"
         })
         const data = await res.json()
         if (res.ok) {
-          console.log(data.complaint, data.username)
           setIsLoading(false)
-          setUsername(data.username)
+          setUsername(data.username[0].toUpperCase() + data.username.slice(1))
           data.complaint && setLatestComplaint(data.complaint)
         }
         else {
           navigate("/login")
         }
       } catch (err) {
-        console.log("Error: " + err.message)
         navigate("/login")
       }
     }
@@ -71,114 +70,11 @@ const UserDashboard = () => {
 
         {/* Stats Section */}
         <div className='bottom-section'>
-          <section className="stats-section">
-            <h3 className="section-title">Your Impact</h3>
-            <div className="stats-container">
-              <div className="stats">
-                <div className="stats-list">
-                  {statsData.map((stat, index) => (
-                    <div key={index} className="stat-item">
-                      <div className="stat-info">
-                        <span className="stat-title">{stat.title}</span>
-                        <span
-                          className="stat-count"
-                          style={{ backgroundColor: stat.color }}
-                        >
-                          {stat.count}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="chart-container">
-                  <svg viewBox="0 0 200 200" className="doughnut-chart">
-                    {(() => {
-                      let currentAngle = 0;
-                      return statsData.map((stat, index) => {
-                        const percentage = stat.count / totalComplaints;
-                        const angle = percentage * 360;
-                        const startAngle = currentAngle;
-                        currentAngle += angle;
-                        const startRad = (startAngle - 90) * Math.PI / 180;
-                        const endRad = (currentAngle - 90) * Math.PI / 180;
-                        const x1 = 100 + 70 * Math.cos(startRad);
-                        const y1 = 100 + 70 * Math.sin(startRad);
-                        const x2 = 100 + 70 * Math.cos(endRad);
-                        const y2 = 100 + 70 * Math.sin(endRad);
-                        const largeArc = angle > 180 ? 1 : 0;
-                        return (
-                          <path
-                            key={index}
-                            d={`M 100 100 L ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2} Z`}
-                            fill={stat.color}
-                          />
-                        );
-                      });
-                    })()}
-                    <circle cx="100" cy="100" r="45" fill="#f8fdf5" />
-                    <text x="100" y="110" textAnchor="middle" className="chart-total">
-                      {totalComplaints}
-                    </text>
-                  </svg>
-                </div>
-              </div>
-              <div className="stats">
-                <div className="stats-list">
-                  {statsData.map((stat, index) => (
-                    <div key={index} className="stat-item">
-                      <div className="stat-info">
-                        <span className="stat-title">{stat.title}</span>
-                        <span
-                          className="stat-count"
-                          style={{ backgroundColor: stat.color }}
-                        >
-                          {stat.count}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="chart-container">
-                  <svg viewBox="0 0 200 200" className="doughnut-chart">
-                    {(() => {
-                      let currentAngle = 0;
-                      return statsData.map((stat, index) => {
-                        const percentage = stat.count / totalComplaints;
-                        const angle = percentage * 360;
-                        const startAngle = currentAngle;
-                        currentAngle += angle;
-                        const startRad = (startAngle - 90) * Math.PI / 180;
-                        const endRad = (currentAngle - 90) * Math.PI / 180;
-                        const x1 = 100 + 70 * Math.cos(startRad);
-                        const y1 = 100 + 70 * Math.sin(startRad);
-                        const x2 = 100 + 70 * Math.cos(endRad);
-                        const y2 = 100 + 70 * Math.sin(endRad);
-                        const largeArc = angle > 180 ? 1 : 0;
-                        return (
-                          <path
-                            key={index}
-                            d={`M 100 100 L ${x1} ${y1} A 70 70 0 ${largeArc} 1 ${x2} ${y2} Z`}
-                            fill={stat.color}
-                          />
-                        );
-                      });
-                    })()}
-                    <circle cx="100" cy="100" r="45" fill="#f8fdf5" />
-                    <text x="100" y="110" textAnchor="middle" className="chart-total">
-                      {totalComplaints}
-                    </text>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-          </section>
-          {/* Complaints Section */}
           <section className="complaints-section">
             <div className="complaints-header">
               <h3 className="section-title">Latest Complaint</h3>
             </div>
-            {latestComplaint && 
+            {latestComplaint ? 
               <div className="complaints-grid">
 
               <div className="dashboard-complaint-card">
@@ -202,7 +98,14 @@ const UserDashboard = () => {
               <div className='bottom-text'>
                 <NavLink className='see-more' to="/past-complaints">See More...</NavLink>
               </div>
-            </div>}
+            </div>
+          :
+          <div className='no-latest-complaint'>
+            <FaWpforms size={60}/>
+            <p>No Complaints</p>
+            <p>Press New Complaint to submit one!</p>
+          </div>  
+          }
 
           </section>
         </div>

@@ -33,7 +33,6 @@ const OfficerDashboard = () => {
   }, [])
 
   const handleLogout = async () => {
-    console.log("fuckyou")
     const res = await fetch("http://localhost:3000/api/logout", {
       method: "GET",
       credentials: "include"
@@ -112,7 +111,6 @@ const OfficerDashboard = () => {
         </div>
 
         <div className="activity-list">
-          {console.log(dashboardInfo)}
           {
           dashboardInfo.recentComplaints.map((complaint) => (
             <div key={complaint.complaint_id} className="activity-item">

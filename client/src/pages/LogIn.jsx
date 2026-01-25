@@ -1,13 +1,16 @@
 import AuthForm from "../components/AuthForm"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
+import MessagePopup from "../components/MessagePopup"
 import { useNavigate } from "react-router-dom"
 
 const LogIn = () => {
 
     const navigate = useNavigate()
 
-    const username_i = useRef(null)
-    const pswd_i = useRef(null) 
+    const [role, setRole] = useState('citizen')
+    const [errDialog, setErrDialog] = useState({})
+    const [username, setUsername] = useState("")
+    const [pswd, setPswd] = useState("")
 
     useEffect(() => {
         const authUser = async () => {
@@ -16,7 +19,7 @@ const LogIn = () => {
                 credentials: "include"
             })
             const data = await res.json()
-            if (data.redirect){
+            if (data.redirect) {
                 navigate("/user-dashboard")
             }
         }
@@ -31,27 +34,60 @@ const LogIn = () => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({username: username_i.current.value,
-                pswd: pswd_i.current.value
+            body: JSON.stringify({
+                role, username, pswd
             })
         })
         const data = await res.json()
-        if (data.user){
-            navigate("/user-dashboard")
+        if (res.status === 401) {
+            setErrDialog({
+                visibility: true,
+                iconType: "error",
+                title: "Invalid Credentials",
+                message: "Enter correct details",
+                btnText: "Close",
+                handlePopupBtnClick: () => {
+                    setErrDialog({})
+                }
+            })
+        }
+        if (res.ok) {
+            if (data.role === 'citizen') {
+                navigate("/user-dashboard")
+            }
+            else if (data.role === 'officer') {
+                navigate("/officer-dashboard")
+            }
         }
     }
+
+    const getRole = (role) => {
+        setRole(role)
+    }
+
     return (
-        <div>
-            <AuthForm
-                type="Log In"
-                redirect="Sign Up"
-                redirect_link="/signup"
-                redirect_text="Don't have an account?"
-                handleSubmit={handleSubmit}
-                username_ref={username_i}
-                pswd_ref={pswd_i}
-            />
-        </div>
+        <>
+            <div className="login-form-container">
+                <AuthForm
+                    type="Log In"
+                    redirect="Sign Up"
+                    redirect_link="/signup"
+                    redirect_text="Don't have an account?"
+                    handleSubmit={handleSubmit}
+                    onUsernameChange={(e) => { setUsername(e.target.value) }}
+                    username_val={username}
+                    onPswdChange={(e) => { setPswd(e.target.value) }}
+                    pswd_val={pswd}
+                    loginPage={true}
+                    getRole={getRole}
+                />
+            </div>
+            {
+                errDialog.visibility && <MessagePopup
+                    props={errDialog}
+                />
+            }
+        </>
     )
 }
 

@@ -1,0 +1,60 @@
+.officer-stat-card {
+  width: 380px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #2a2a2a;
+  color: #ffffff;
+  position: relative;
+}
+
+.officer-stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.officer-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 107, 53, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+/* .officer-stat-change {
+  font-size: 14px;
+  font-weight: 700;
+  color: #00d9a5;
+  background: rgba(0, 217, 165, 0.15);
+  padding: 6px 12px;
+  border-radius: 8px;
+} */
+
+.officer-stat-value {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.officer-stat-label {
+  font-size: 15px;
+  color: #a1a1aa;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.officer-stat-bar {
+  height: 4px;
+  background: #3a3a3a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.officer-stat-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}

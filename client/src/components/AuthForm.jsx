@@ -24,12 +24,14 @@ const AuthForm = (props) => {
           &&
           <div className="select-role">
             <button className={activeRole==='citizen'?'active-role':''}
+            type='button'
             onClick={() => {
               setActiveRole('citizen')
               props.getRole('citizen')
             }}
             >Citizen</button>
             <button className={activeRole==='officer' ? 'active-role' : ''}
+            type='button'
             onClick={() => {
               setActiveRole('officer')
               props.getRole('officer')
